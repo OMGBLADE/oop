@@ -1,6 +1,9 @@
 import streamlit as st
 from typing import List
-import speech_recognition as sr
+import sounddevice as sd
+import vosk
+import numpy as np
+import json
 
 # Define OOP Classes
 class Ingredient:
@@ -60,137 +63,94 @@ def initialize_recipes() -> List[Recipe]:
             "1. Cook beef with ginger, garlic, and spices.\n2. Prepare a flour-based gravy and add it to the meat.\n3. Simmer for several hours.\n4. Garnish with ginger slices and serve with naan."
         ),
         Recipe(
-            "Haleem",
-            [Ingredient("lentils"), Ingredient("wheat"), Ingredient("beef"), Ingredient("spices"), Ingredient("onion")],
-            "1. Cook beef with lentils, wheat, and spices.\n2. Blend the mixture to a thick consistency.\n3. Fry onions and use as a garnish.\n4. Serve hot with naan and lemon."
+            "Pasta Carbonara",
+            [Ingredient("pasta"), Ingredient("egg"), Ingredient("cheese"), Ingredient("bacon"), Ingredient("garlic")],
+            "1. Boil pasta in salted water.\n2. Fry bacon and garlic in a pan until crispy.\n3. In a bowl, whisk eggs and cheese together.\n4. Combine pasta with bacon, then mix in egg mixture to create a creamy sauce."
         ),
         Recipe(
-            "Pakoras",
-            [Ingredient("chickpea flour"), Ingredient("potato"), Ingredient("onion"), Ingredient("spices"), Ingredient("green chili")],
-            "1. Mix chickpea flour, spices, and water to form a batter.\n2. Dip potato and onion slices in the batter.\n3. Deep fry until golden brown.\n4. Serve with chutney."
+            "Caesar Salad",
+            [Ingredient("romaine lettuce"), Ingredient("croutons"), Ingredient("parmesan cheese"), Ingredient("caesar dressing")],
+            "1. Tear romaine lettuce into pieces.\n2. Add croutons, parmesan cheese, and Caesar dressing.\n3. Toss well and serve chilled."
         ),
         Recipe(
-            "Chapli Kabab",
-            [Ingredient("minced meat"), Ingredient("tomato"), Ingredient("onion"), Ingredient("spices"), Ingredient("egg")],
-            "1. Mix minced meat with spices, onion, tomato, and egg.\n2. Shape into flat patties.\n3. Fry in oil until crispy.\n4. Serve hot with raita."
+            "Mashed Potatoes",
+            [Ingredient("potatoes"), Ingredient("butter"), Ingredient("milk"), Ingredient("salt"), Ingredient("pepper")],
+            "1. Boil potatoes until tender.\n2. Mash them with butter and milk until smooth.\n3. Season with salt and pepper, and serve hot."
         ),
         Recipe(
-            "Kheer",
-            [Ingredient("milk"), Ingredient("rice"), Ingredient("sugar"), Ingredient("cardamom"), Ingredient("nuts")],
-            "1. Boil milk and add rice.\n2. Cook until rice is soft and the mixture thickens.\n3. Add sugar and cardamom.\n4. Garnish with nuts and serve chilled."
+            "Veggie Stir Fry",
+            [Ingredient("bell pepper"), Ingredient("broccoli"), Ingredient("carrot"), Ingredient("soy sauce"), Ingredient("garlic")],
+            "1. Stir fry vegetables in a hot pan with garlic.\n2. Add soy sauce and cook for a few more minutes.\n3. Serve with rice."
         ),
         Recipe(
-            "Samosa",
-            [Ingredient("flour"), Ingredient("potato"), Ingredient("peas"), Ingredient("spices"), Ingredient("oil")],
-            "1. Prepare dough with flour and water.\n2. Make a filling with boiled potatoes, peas, and spices.\n3. Shape dough into triangles, add filling, and seal.\n4. Deep fry until golden."
+            "Pancakes",
+            [Ingredient("flour"), Ingredient("egg"), Ingredient("milk"), Ingredient("butter"), Ingredient("maple syrup")],
+            "1. Mix flour, egg, milk, and butter to make the batter.\n2. Cook pancakes on a hot griddle.\n3. Serve with maple syrup."
         ),
         Recipe(
-            "Saag",
-            [Ingredient("spinach"), Ingredient("mustard greens"), Ingredient("cornmeal"), Ingredient("spices"), Ingredient("butter")],
-            "1. Cook spinach and mustard greens with spices.\n2. Blend to a smooth consistency.\n3. Add cornmeal to thicken.\n4. Serve with butter and makki ki roti."
+            "Fried Rice",
+            [Ingredient("rice"), Ingredient("egg"), Ingredient("peas"), Ingredient("soy sauce"), Ingredient("carrot")],
+            "1. Stir fry rice with peas, carrots, and soy sauce.\n2. Scramble eggs in a separate pan and add to the rice.\n3. Serve hot."
         ),
         Recipe(
-            "Aloo Paratha",
-            [Ingredient("flour"), Ingredient("potato"), Ingredient("spices"), Ingredient("butter"), Ingredient("green chili")],
-            "1. Prepare dough with flour and water.\n2. Make a spiced mashed potato filling.\n3. Roll dough, add filling, and seal.\n4. Cook on a griddle with butter."
+            "Chicken Tikka Masala",
+            [Ingredient("chicken"), Ingredient("yogurt"), Ingredient("tomato"), Ingredient("cream"), Ingredient("spices")],
+            "1. Marinate chicken with yogurt and spices.\n2. Grill or cook the chicken.\n3. Prepare a creamy tomato sauce and add the chicken.\n4. Serve with naan or rice."
         ),
-        Recipe(
-            "Gulab Jamun",
-            [Ingredient("milk powder"), Ingredient("flour"), Ingredient("sugar"), Ingredient("cardamom"), Ingredient("oil")],
-            "1. Make a dough with milk powder, flour, and water.\n2. Shape into small balls.\n3. Deep fry until golden brown.\n4. Soak in sugar syrup flavored with cardamom."
-        ),
-        Recipe(
-            "Sheer Khurma",
-            [Ingredient("milk"), Ingredient("vermicelli"), Ingredient("dates"), Ingredient("sugar"), Ingredient("nuts")],
-            "1. Heat milk and add vermicelli.\n2. Cook until vermicelli softens.\n3. Add sugar, dates, and nuts.\n4. Serve warm."
-        ),
-        Recipe(
-            "Payesh",
-            [Ingredient("milk"), Ingredient("rice"), Ingredient("sugar"), Ingredient("cardamom"), Ingredient("nuts")],
-            "1. Boil milk and add rice.\n2. Simmer until rice is cooked and the mixture thickens.\n3. Add sugar and cardamom.\n4. Garnish with nuts and serve chilled."
-        ),
-        Recipe(
-            "Seekh Kabab",
-            [Ingredient("minced meat"), Ingredient("spices"), Ingredient("onion"), Ingredient("ginger"), Ingredient("garlic")],
-            "1. Mix minced meat with spices, onion, ginger, and garlic.\n2. Shape onto skewers.\n3. Grill or bake until cooked.\n4. Serve with chutney."
-        ),
-        Recipe(
-            "Chicken Tikka",
-            [Ingredient("chicken"), Ingredient("yogurt"), Ingredient("spices"), Ingredient("lemon"), Ingredient("oil")],
-            "1. Marinate chicken pieces with yogurt, spices, and lemon.\n2. Grill or bake until cooked.\n3. Serve with naan and chutney."
-        ),
-        Recipe(
-            "Chana Chaat",
-            [Ingredient("chickpeas"), Ingredient("onion"), Ingredient("tomato"), Ingredient("spices"), Ingredient("lemon")],
-            "1. Mix boiled chickpeas with chopped onion, tomato, and spices.\n2. Add lemon juice and mix well.\n3. Serve as a snack or side dish."
-        ),
-        Recipe(
-            "Shami Kabab",
-            [Ingredient("minced meat"), Ingredient("lentils"), Ingredient("onion"), Ingredient("spices"), Ingredient("egg")],
-            "1. Cook minced meat with lentils and spices.\n2. Blend to a smooth mixture.\n3. Shape into patties and fry.\n4. Serve with chutney."
-        ),
-        Recipe(
-            "Bhindi Masala",
-            [Ingredient("okra"), Ingredient("onion"), Ingredient("tomato"), Ingredient("spices"), Ingredient("oil")],
-            "1. Fry okra in oil and set aside.\n2. Cook onion and tomato with spices.\n3. Add fried okra and cook for a few minutes.\n4. Serve with roti."
-        ),
-        Recipe(
-            "Keema Matar",
-            [Ingredient("minced meat"), Ingredient("peas"), Ingredient("onion"), Ingredient("tomato"), Ingredient("spices")],
-            "1. Cook minced meat with onion, tomato, and spices.\n2. Add peas and cook until tender.\n3. Serve with rice or roti."
-        ),
-        Recipe(
-            "Halwa Puri",
-            [Ingredient("semolina"), Ingredient("sugar"), Ingredient("flour"), Ingredient("oil"), Ingredient("spices")],
-            "1. Make halwa by cooking semolina with sugar and water.\n2. Prepare dough for puris and roll into circles.\n3. Deep fry puris until golden.\n4. Serve hot with halwa."
-        )
+        # Add more recipes as needed
     ]
 
-# Speech-to-Text Function
-def recognize_speech() -> str:
-    recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
+# Recognize speech using Vosk
+def recognize_speech_vosk() -> str:
+    model = vosk.Model(".\vosk-model-small-en-us-0.15")  # Path to the Vosk model
+    samplerate = 16000
+    rec = vosk.KaldiRecognizer(model, samplerate)
+
+    # Record audio for 5 seconds
+    with sd.InputStream(channels=1, dtype='int16', samplerate=samplerate) as stream:
         st.info("Listening... Please speak now.")
-        try:
-            audio = recognizer.listen(source, timeout=5)
-            text = recognizer.recognize_google(audio)
-            st.success(f"You said: {text}")
-            return text
-        except sr.UnknownValueError:
-            st.error("Sorry, could not understand the audio.")
-        except sr.RequestError:
-            st.error("Could not request results, please check your internet connection.")
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
-        return ""
+        audio_data = []
+        
+        for _ in range(0, int(samplerate / 1024 * 5)):  # Record for 5 seconds
+            audio_chunk, overflowed = stream.read(1024)  # Read audio in chunks
+            audio_data.append(audio_chunk)
+            if rec.AcceptWaveform(audio_chunk):  # Check if speech is recognized
+                break
+
+        # Combine audio chunks into one array
+        audio_array = np.concatenate(audio_data, axis=0)
+
+        # Recognize speech using Vosk model
+        if rec.AcceptWaveform(audio_array):
+            result = rec.Result()
+            result_json = json.loads(result)
+            return result_json.get('text', '')
+        else:
+            st.error("Could not recognize the speech.")
+            return ""
 
 # Streamlit Frontend
 def main():
-    st.title("AI Recipe Maker")
+    st.title("AI Recipe Maker | A Project by MindFlow Solution")
 
     # Initialize recipes dataset
     recipes = initialize_recipes()
     engine = AIEngine(recipes)
 
     # User input for ingredients and recipe name
-    st.header("Find Recipes by Ingredients or by There Names")
-    user_input_ingredients = st.text_input("Enter ingredients (comma-separated):", "")
-    user_input_recipe_name = st.text_input("Enter recipe name (optional):", "")
+    st.header("Find Recipes by Ingredients or by Name")
+    
+    # Wrapping the inputs in a form
+    with st.form(key='recipe_form'):
+        user_input_ingredients = st.text_input("Enter ingredients (comma-separated):", "")
+        user_input_recipe_name = st.text_input("Enter recipe name (optional):", "")
+        
+        # Add a submit button to trigger the form submission
+        submit_button = st.form_submit_button(label='Get Recipe')
 
-    # Speech recognition for ingredients
-    if st.button("Use Microphone for Ingredients"):
-        speech_input = recognize_speech()
-        if speech_input:
-            user_input_ingredients = speech_input
-
-    # Speech recognition for recipe name
-    if st.button("Use Microphone for Recipe Name"):
-        speech_input = recognize_speech()
-        if speech_input:
-            user_input_recipe_name = speech_input
-
-    if st.button("Get Recipes"):
-        # Process user inputs
+    # Check if the form was submitted
+    if submit_button:
+        # Function to process the search logic when text input is entered
         ingredients = [Ingredient(ing) for ing in user_input_ingredients.split(",") if ing.strip()]
         recipe_name = user_input_recipe_name.strip()
 
@@ -212,6 +172,19 @@ def main():
                 st.error("No recipes found for the given ingredients.")
         else:
             st.error("Please enter at least one ingredient or a recipe name.")
+
+    # Speech recognition buttons
+    if st.button("Use Microphone for Ingredients"):
+        speech_input = recognize_speech_vosk()
+        if speech_input:
+            user_input_ingredients = speech_input
+            st.success(f"Recognized Ingredients: {user_input_ingredients}")
+
+    if st.button("Use Microphone for Recipe Name"):
+        speech_input = recognize_speech_vosk()
+        if speech_input:
+            user_input_recipe_name = speech_input
+            st.success(f"Recognized Recipe Name: {user_input_recipe_name}")
 
 if __name__ == "__main__":
     main()
