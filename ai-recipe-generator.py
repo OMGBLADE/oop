@@ -574,7 +574,7 @@ def main():
                     st.markdown(f"**Ingredients:** {', '.join([ing.name for ing in recipe.ingredients])}")
                     st.markdown('<div class="steps-title">Steps:</div>', unsafe_allow_html=True)
                     for step in recipe.steps.split("\n"):
-                        st.markdown(f"- {step}")
+                        st.markdown(f"{step}")
                     st.divider()
             else:
                 st.error("❌ No recipes found for the given ingredients.")
